@@ -1,5 +1,5 @@
-const CACHE = 'daily-log-v2';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.png', './icon-512.png'];
+const CACHE = 'daily-log-v3';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon-v3.png', './icon-192-v3.png', './icon-512-v3.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
 });

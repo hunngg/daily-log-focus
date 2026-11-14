@@ -1,4 +1,4 @@
-const CACHE = 'daily-log-life-v4';
+const CACHE = 'daily-log-life-v5';
 const ASSETS = ['./', './index.html', './app.js', './core.js', './style.css', './manifest.webmanifest', './apple-touch-icon-v3.png', './icon-192-v3.png', './icon-512-v3.png'];
 const urls = new Set(ASSETS.map(path => new URL(path, self.registration.scope).href));
 self.addEventListener('install', event => {

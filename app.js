@@ -42,7 +42,7 @@ function savePlan(announce = true) {
   if (!selected) { if (announce) status('先選擇一個活動即可開始。'); return false; }
   patchDay({ category: selected, minutes, goal: $('goal').value.trim(), moment: $('moment').value.trim() });
   const saved = persist(); renderDays(); $('planSaved').textContent = saved ? '今天的安排已保存在此瀏覽器。' : '目前安排尚未成功保存，請先匯出。';
-  if (announce && saved) status('已記下今天的安排。'); return true;
+  if (announce && saved) status('已記下今天的安排。'); return saved;
 }
 function renderReview() {
   $('reflections').replaceChildren(...REFLECTIONS.map(value => {
@@ -142,7 +142,7 @@ $('start').onclick = () => {
   if (data.timer || !savePlan(false)) { if (!selected) status('先選擇一個活動即可開始。'); return; }
   unlockAudio(); const now = Date.now();
   data.timer = { id: uid(), day: dayKey(), category: selected, goal: $('goal').value.trim(), state: 'running', totalMs: minutes * 60000, remainingMs: minutes * 60000, elapsedMs: 0, startedAt: now };
-  persist(); renderChoices(); renderTimer(); $('session').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!persist()) { data.timer = null; status('無法儲存計時狀態，請先處理儲存問題再開始。'); renderChoices(); renderTimer(); return; } renderChoices(); renderTimer(); $('session').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 $('pause').onclick = () => { const t = data.timer; if (!t) return; if (t.state === 'paused') { unlockAudio(); resume(t, Date.now()); } else pause(t, Date.now()); persist(); renderTimer(); };
 $('extend').onclick = () => { if (!data.timer) return; unlockAudio(); extend(data.timer, Date.now()); persist(); renderTimer(); status('已重新選擇再繼續 15 分鐘。'); };
@@ -191,6 +191,11 @@ $('export').onclick = () => {
   status('已建立備份檔，請確認已下載並妥善保存。');
 };
 function replaceData(next) {
+  const existingRecovery = (() => { try { return localStorage.getItem(`${KEY}.before-import`); } catch { return null; } })();
+  if (existingRecovery !== null) {
+    status('已有先前匯入的復原資料。請先匯出完整備份並確認檔案已保存，再選擇是否覆蓋復原資料。');
+    if (!confirm('已有先前匯入的復原資料。請先確認已下載並保存包含舊資料的完整備份。確定允許覆蓋這份復原資料嗎？')) return false;
+  }
   try {
     const current = localStorage.getItem(KEY);
     if (current !== lastRaw) { status('資料已由其他分頁變更，請重新載入後再匯入。'); return false; }

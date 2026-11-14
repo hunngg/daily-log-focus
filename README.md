@@ -1,5 +1,7 @@
 # Daily Log｜我的生活重心
 
+本次交班依使用者提供的最新審查修正版 ZIP 整合。最新測試與差異見 `HANDOFF_REPORT.md`；`TEST_REPORT.md` 為前次審查紀錄。
+
 純靜態、繁體中文的活動開始與切換練習工具。沿用原版 GitHub Pages、安裝圖示及本機資料儲存，不需要建置、不使用第三方套件或外部服務。
 
 ## 每天使用
@@ -17,7 +19,7 @@
 - 偵測到第二版時，可自行選擇複製安排、回顧與任務；第二版原始資料不變。原版 `dailylog.v1` 情境不同，不自動轉換。第二版計時明細含暫停時間，不轉換；仍保留原始紀錄。
 - 匯出 JSON 包含本版資料，以及舊版鍵值的原始字串、最近一次匯入前本版備份。下載檔可能含私人文字，請妥善保存。
 - 匯入只接受本版匯出的 `app: dailylog-life`、`backupVersion: 1` 包裝與合法 v3 資料，限制 5 MB。驗證日期、月份、欄位類型、類別、重複 ID 與計時一致性；確認後取代本版資料。匯出檔的 `legacyRaw` 只供保存／人工復原，**不會自動寫回舊版鍵值**。
-- 匯入前先將現有本版原始字串存入 `dailylog.life.v3.before-import`，成功才取代本版；只保留最近一次，重要資料請先另行匯出。若空間不足，取消匯入。
+- 匯入前先將現有本版原始字串存入 `dailylog.life.v3.before-import`，成功才取代本版；只保留最近一次；再次匯入前若已有復原資料，會另外警告並要求確認，重要資料請先另行匯出。若空間不足，取消匯入。
 - 原始資料讀取／格式有問題時停止覆寫，顯示提示，可先匯出原始字串；儲存失敗不假稱已保存。
 - 多分頁發現資料更新會停止舊分頁寫入，避免覆蓋另一分頁。請先匯出尚未保存內容，再重新載入；無跨裝置同步。
 - 檔案、網站流量由 GitHub Pages 提供，主機仍可能保留 IP 等一般存取紀錄；私人記錄不包含在網站請求中。
@@ -47,21 +49,21 @@ node --test tests/core.test.mjs
 node tests/browser.cjs
 ```
 
-瀏覽器測試需要開發環境可載入 `playwright`，並有 Chromium（預設 `/usr/bin/chromium`，可用 `CHROMIUM_PATH` 指定）。測試會啟動臨時本機 HTTP 伺服器、以 `/daily-log-focus/` 子路徑模擬 Pages，使用獨立瀏覽器資料，不接觸真實紀錄。升級測試取用本儲存庫既有 `329c277` 的舊版快取程式。請用 Git checkout 執行完整測試。
+瀏覽器測試需要開發環境可載入 `playwright`，並有 Chromium（預設 `/usr/bin/chromium`，可用 `CHROMIUM_PATH` 指定）。測試會啟動臨時本機 HTTP 伺服器、以 `/daily-log-focus/` 子路徑模擬 Pages，使用獨立瀏覽器資料，不接觸真實紀錄。升級測試取用本儲存庫既有 `329c277`（正式版 v3）與 `eab08aa`（審查版 v4）的快取程式。請用 Git checkout 執行完整測試。
 
 手動預覽：`python3 -m http.server 8765`，瀏覽 `http://localhost:8765/`。請以 HTTP／HTTPS 開啟，不直接雙擊 HTML（ES modules 與 Service Worker 需要網站來源）。
 
 ## 待審查與部署
 
-目前修改分支：`review/life-focus-simple`。未推送、未更新正式網站。
+目前修改分支：`review/life-focus-handoff-fixes`。僅推送審查分支供檢查，未更新 main 或正式網站。
 原版保存分支：`archive/daily-log-before-life-focus-20261114`，原版 commit：`329c277d797a4b16d217a952af936c88697a44b9`。
 
 使用者確認後才將審查分支合併並推送 `main`。GitHub Pages 保持 `main / (root)`，網址保持 `https://hunngg.github.io/daily-log-focus/`，不需新部署服務或帳號。確認 Pages 建置的 commit、HTTP 回應、圖示／manifest／模組資源及實機離線操作。
 
-Service Worker 名稱為 `daily-log-life-v4`：安裝時完整快取，更新等待使用者按「重新載入新版」，避免活動中無預警換版；舊版頁面沒有更新按鈕時，關閉該網站所有分頁及主畫面 App 再重開即可啟用。啟用後只刪除 `daily-log-` 前綴的舊快取，不碰 localStorage。
+Service Worker 名稱為 `daily-log-life-v5`：安裝時完整快取，更新等待使用者按「重新載入新版」，避免活動中無預警換版；舊版頁面沒有更新按鈕時，關閉該網站所有分頁及主畫面 App 再重開即可啟用。啟用後只刪除 `daily-log-` 前綴的舊快取，不碰 localStorage。
 
 ### 回復
 
 - 尚未發布：切回 `main` 或原版保存分支即可，線上網站原本就不受影響。
-- 發布後：用 Git revert 回退此改版的提交，再推送 `main`，由 Pages 重建；不要強制覆寫歷史。為讓已安裝新版的離線用戶拿到舊頁面，回復時也必須將舊版 `sw.js` 的 cache 名稱提高成新且唯一版本（例如 `daily-log-rollback-v5`），由該次安裝快取舊版資源；關閉所有分頁／主畫面 App 再重開。
+- 發布後：用 Git revert 回退此改版的提交，再推送 `main`，由 Pages 重建；不要強制覆寫歷史。為讓已安裝新版的離線用戶拿到舊頁面，回復時也必須將舊版 `sw.js` 的 cache 名稱提高成新且唯一版本（例如 `daily-log-rollback-v6`），由該次安裝快取舊版資源；關閉所有分頁／主畫面 App 再重開。
 - 新版資料仍留在獨立鍵值，原版可繼續讀取舊資料；兩版紀錄不自動合併。
